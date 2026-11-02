@@ -4,6 +4,7 @@ import json
 import unittest
 from contextlib import ExitStack
 from unittest.mock import patch
+from types import SimpleNamespace
 
 search_module = importlib.import_module("google_play_scraper.features.search")
 
@@ -23,10 +24,9 @@ class SearchOptionalTopResultTests(unittest.TestCase):
 
         with ExitStack() as stack:
             stack.enter_context(patch.object(search_module, "get", return_value="<html></html>"))
-            stack.enter_context(patch.object(search_module.Regex.SCRIPT, "findall", return_value=["script"]))
+            stack.enter_context(patch.object(search_module.Regex, "SCRIPT", SimpleNamespace(findall=lambda _: ["script"])))
             stack.enter_context(patch.object(search_module.Regex.KEY, "findall", return_value=["ds:4'"]))
-            stack.enter_context(patch.object(search_module.Regex.VALUE, "findall",
-                         return_value=[json.dumps(payload)]))
+            stack.enter_context(patch.object(search_module.Regex, "VALUE", SimpleNamespace(findall=lambda _: [json.dumps(payload)])))
             stack.enter_context(patch.object(search_module.ElementSpecs, "SearchResult",
                          {"appId": AppIdSpec()}))
             stack.enter_context(patch.object(search_module.ElementSpecs, "SearchResultOnTop", {}))

@@ -2,6 +2,7 @@
 import importlib
 import json
 import unittest
+from contextlib import ExitStack
 from unittest.mock import patch
 
 search_module = importlib.import_module("google_play_scraper.features.search")
@@ -20,16 +21,15 @@ class SearchOptionalTopResultTests(unittest.TestCase):
             def extract_content(self, item):
                 return item["app_id"]
 
-        with (
-            patch.object(search_module, "get", return_value="<html></html>"),
-            patch.object(search_module.Regex.SCRIPT, "findall", return_value=["script"]),
-            patch.object(search_module.Regex.KEY, "findall", return_value=["ds:4'"]),
-            patch.object(search_module.Regex.VALUE, "findall",
-                         return_value=[json.dumps(payload)]),
-            patch.object(search_module.ElementSpecs, "SearchResult",
-                         {"appId": AppIdSpec()}),
-            patch.object(search_module.ElementSpecs, "SearchResultOnTop", {}),
-        ):
+        with ExitStack() as stack:
+            stack.enter_context(patch.object(search_module, "get", return_value="<html></html>"))
+            stack.enter_context(patch.object(search_module.Regex.SCRIPT, "findall", return_value=["script"]))
+            stack.enter_context(patch.object(search_module.Regex.KEY, "findall", return_value=["ds:4'"]))
+            stack.enter_context(patch.object(search_module.Regex.VALUE, "findall",
+                         return_value=[json.dumps(payload)]))
+            stack.enter_context(patch.object(search_module.ElementSpecs, "SearchResult",
+                         {"appId": AppIdSpec()}))
+            stack.enter_context(patch.object(search_module.ElementSpecs, "SearchResultOnTop", {}))
             results = search_module.search(
                 "bilancio familiare", country="it", lang="it", n_hits=50
             )

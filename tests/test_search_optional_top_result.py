@@ -25,7 +25,7 @@ class SearchOptionalTopResultTests(unittest.TestCase):
         with ExitStack() as stack:
             stack.enter_context(patch.object(search_module, "get", return_value="<html></html>"))
             stack.enter_context(patch.object(search_module.Regex, "SCRIPT", SimpleNamespace(findall=lambda _: ["script"])))
-            stack.enter_context(patch.object(search_module.Regex.KEY, "findall", return_value=["ds:4'"]))
+            stack.enter_context(patch.object(search_module.Regex, "KEY", SimpleNamespace(findall=lambda _: ["ds:4"])))
             stack.enter_context(patch.object(search_module.Regex, "VALUE", SimpleNamespace(findall=lambda _: [json.dumps(payload)])))
             stack.enter_context(patch.object(search_module.ElementSpecs, "SearchResult",
                          {"appId": AppIdSpec()}))
